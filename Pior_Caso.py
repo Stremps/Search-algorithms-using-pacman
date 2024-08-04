@@ -79,6 +79,7 @@ def bfs(start_point, end_point, graph):
 def dfs(start_point, end_point, graph):
     stack = [(start_point, [start_point])]
     visited = set()
+    in_stack = set([start_point])  # Conjunto para rastrear nós na pilha
     iteration = 1
     result = ""
 
@@ -100,9 +101,10 @@ def dfs(start_point, end_point, graph):
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho: {len(visited):.1f}\n"
             return result
 
-        for (neighbor, _) in graph.nodes.get(current, []):
-            if neighbor not in visited:
+        for (neighbor, _) in reversed(graph.nodes.get(current, [])):  # Inverte a ordem dos vizinhos
+            if neighbor not in visited and neighbor not in in_stack:
                 stack.append((neighbor, path + [neighbor]))
+                in_stack.add(neighbor)  # Adiciona ao conjunto de nós na pilha
 
         iteration += 1
 
