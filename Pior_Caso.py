@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 from collections import deque
+import tracemalloc
 
 class Graph:
     def __init__(self):
@@ -21,7 +22,7 @@ def read_file(file):
 
     with open(file, 'r') as f:
         lines = f.readlines()
-    
+
     for line in lines:
         line = line.strip()  # Remove leading and trailing whitespace
         if line.startswith('ponto_inicial'):
@@ -37,10 +38,22 @@ def read_file(file):
                 graph.add_edge(origin, destination, cost)
             except ValueError as e:
                 print(f"Erro ao processar a linha: {line}\nErro: {e}")
-    
+
     return start_point, end_point, graph
 
+def calculate_path_cost(graph, path):
+    cost = 0
+    for i in range(len(path) - 1):
+        current = path[i]
+        next_node = path[i + 1]
+        for (neighbor, weight) in graph.nodes[current]:
+            if neighbor == next_node:
+                cost += weight
+                break
+    return cost
+
 def bfs(start_point, end_point, graph):
+    tracemalloc.start()
     queue = deque([(start_point, [start_point])])
     visited = set()
     in_queue = set([start_point])  # Conjunto para rastrear nós na fila
@@ -51,11 +64,12 @@ def bfs(start_point, end_point, graph):
         result += f"Iteração {iteration}:\n"
         queue_str = ", ".join([node for node, _ in queue])
         result += f"Fila: {queue_str}\n"
-        
+
         (current, path) = queue.popleft()
         in_queue.remove(current)  # Remove da fila
         result += f"Nó a ser visitado: {current}\n"
-        result += f"Medida de desempenho: {len(visited):.1f}\n\n"
+        path_cost = calculate_path_cost(graph, path)
+        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -63,7 +77,10 @@ def bfs(start_point, end_point, graph):
         visited.add(current)
 
         if current == end_point:
-            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho: {len(visited):.1f}\n"
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            current_mem, peak_mem = tracemalloc.get_traced_memory()
+            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            tracemalloc.stop()
             return result
 
         for (neighbor, _) in graph.nodes.get(current, []):
@@ -74,9 +91,13 @@ def bfs(start_point, end_point, graph):
         iteration += 1
 
     result += "Nenhum caminho encontrado\n"
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+    tracemalloc.stop()
     return result
 
 def dfs(start_point, end_point, graph):
+    tracemalloc.start()
     stack = [(start_point, [start_point])]
     visited = set()
     in_stack = set([start_point])  # Conjunto para rastrear nós na pilha
@@ -87,10 +108,12 @@ def dfs(start_point, end_point, graph):
         result += f"Iteração {iteration}:\n"
         stack_str = ", ".join([node for node, _ in stack])
         result += f"Pilha: {stack_str}\n"
-        
+
         (current, path) = stack.pop()
+        in_stack.remove(current)  # Remove da pilha
         result += f"Nó a ser visitado: {current}\n"
-        result += f"Medida de desempenho: {len(visited):.1f}\n\n"
+        path_cost = calculate_path_cost(graph, path)
+        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -98,7 +121,10 @@ def dfs(start_point, end_point, graph):
         visited.add(current)
 
         if current == end_point:
-            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho: {len(visited):.1f}\n"
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            current_mem, peak_mem = tracemalloc.get_traced_memory()
+            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            tracemalloc.stop()
             return result
 
         for (neighbor, _) in reversed(graph.nodes.get(current, [])):  # Inverte a ordem dos vizinhos
@@ -109,13 +135,54 @@ def dfs(start_point, end_point, graph):
         iteration += 1
 
     result += "Nenhum caminho encontrado\n"
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+    tracemalloc.stop()
     return result
+
+def dfs_no_backtracking(start_point, end_point, graph):
+    tracemalloc.start()
+    current = start_point
+    path = [current]
+    visited = set([current])
+    iteration = 1
+    result = ""
+
+    while True:
+        result += f"Iteração {iteration}:\n"
+        result += f"Nó atual: {current}\n"
+        result += f"Caminho: {' -> '.join(path)}\n"
+        path_cost = calculate_path_cost(graph, path)
+        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
+
+        if current == end_point:
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            current_mem, peak_mem = tracemalloc.get_traced_memory()
+            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            tracemalloc.stop()
+            return result
+
+        unvisited_neighbors = [neighbor for (neighbor, _) in graph.nodes.get(current, []) if neighbor not in visited]
+        if unvisited_neighbors:
+            current = unvisited_neighbors[0]
+            path.append(current)
+            visited.add(current)
+        else:
+            result += "Nenhum caminho encontrado\n"
+            current_mem, peak_mem = tracemalloc.get_traced_memory()
+            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            tracemalloc.stop()
+            return result
+
+        iteration += 1
 
 def execute_searches(start_point, end_point, graph, search_type):
     if search_type == "BFS":
         return bfs(start_point, end_point, graph)
     elif search_type == "DFS":
         return dfs(start_point, end_point, graph)
+    elif search_type == "DFS_NO_BACKTRACKING":
+        return dfs_no_backtracking(start_point, end_point, graph)
     else:
         return "Tipo de busca desconhecido"
 
@@ -139,6 +206,12 @@ class App:
 
         self.dfs_button = tk.Button(self.frame, text="Executar DFS", command=self.run_dfs)
         self.dfs_button.pack(side=tk.LEFT)
+
+        self.dfs_no_backtracking_button = tk.Button(self.frame, text="Executar DFS Sem Backtracking", command=self.run_dfs_no_backtracking)
+        self.dfs_no_backtracking_button.pack(side=tk.LEFT)
+
+        self.show_graph_button = tk.Button(self.frame, text="Exibir Grafo", command=self.show_graph)
+        self.show_graph_button.pack(side=tk.LEFT)
 
         self.text_area = scrolledtext.ScrolledText(root, wrap=tk.NONE, width=100, height=30)
         self.text_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
@@ -175,6 +248,25 @@ class App:
         result = execute_searches(self.start_point, self.end_point, self.graph, "DFS")
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
+
+    def run_dfs_no_backtracking(self):
+        if not self.graph:
+            messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
+            return
+
+        result = execute_searches(self.start_point, self.end_point, self.graph, "DFS_NO_BACKTRACKING")
+        self.text_area.delete(1.0, tk.END)
+        self.text_area.insert(tk.END, result)
+
+    def show_graph(self):
+        if not self.graph:
+            messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
+            return
+
+        self.text_area.delete(1.0, tk.END)
+        self.text_area.insert(tk.END, f"Ponto Inicial: {self.start_point}\n")
+        self.text_area.insert(tk.END, f"Ponto Final: {self.end_point}\n")
+        self.text_area.insert(tk.END, f"{self.graph}\n")
 
 if __name__ == "__main__":
     root = tk.Tk()
