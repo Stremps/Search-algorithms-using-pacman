@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, scrolledtext
 from collections import deque
 import tracemalloc
+import timeit
 
 class Graph:
     def __init__(self):
@@ -69,7 +70,7 @@ def bfs(start_point, end_point, graph):
         in_queue.remove(current)  # Remove da fila
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
+        result += f"Peso total do caminho: {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -77,7 +78,7 @@ def bfs(start_point, end_point, graph):
         visited.add(current)
 
         if current == end_point:
-            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -113,7 +114,7 @@ def dfs(start_point, end_point, graph):
         in_stack.remove(current)  # Remove da pilha
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
+        result += f"Peso total do caminho: {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -121,7 +122,7 @@ def dfs(start_point, end_point, graph):
         visited.add(current)
 
         if current == end_point:
-            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -153,10 +154,10 @@ def dfs_no_backtracking(start_point, end_point, graph):
         result += f"Nó atual: {current}\n"
         result += f"Caminho: {' -> '.join(path)}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Medida de desempenho (peso total do caminho): {path_cost}\n\n"
+        result += f"Peso total do caminho: {path_cost}\n\n"
 
         if current == end_point:
-            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nMedida de desempenho (peso total do caminho): {path_cost}\n"
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -236,27 +237,45 @@ class App:
             messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
             return
 
-        result = execute_searches(self.start_point, self.end_point, self.graph, "BFS")
+        # Medir o tempo de execução e executar o algoritmo apenas uma vez
+        start_time = timeit.default_timer()  # Inicia o cronômetro
+        result = bfs(self.start_point, self.end_point, self.graph)  # Executa o BFS e coleta o resultado
+        time_taken = timeit.default_timer() - start_time  # Calcula o tempo de execução
+
+        # Exibe os resultados e o tempo de execução
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
+        self.text_area.insert(tk.END, f"Tempo de execução BFS: {time_taken:.6f} segundos\n")
 
     def run_dfs(self):
         if not self.graph:
             messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
             return
 
-        result = execute_searches(self.start_point, self.end_point, self.graph, "DFS")
+        # Medir o tempo de execução e executar o algoritmo apenas uma vez
+        start_time = timeit.default_timer()  # Inicia o cronômetro
+        result = dfs(self.start_point, self.end_point, self.graph)  # Executa o DFS e coleta o resultado
+        time_taken = timeit.default_timer() - start_time  # Calcula o tempo de execução
+
+        # Exibe os resultados e o tempo de execução
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
+        self.text_area.insert(tk.END, f"Tempo de execução DFS: {time_taken:.6f} segundos\n")
 
     def run_dfs_no_backtracking(self):
         if not self.graph:
             messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
             return
 
-        result = execute_searches(self.start_point, self.end_point, self.graph, "DFS_NO_BACKTRACKING")
+        # Medir o tempo de execução e executar o algoritmo apenas uma vez
+        start_time = timeit.default_timer()  # Inicia o cronômetro
+        result = dfs_no_backtracking(self.start_point, self.end_point, self.graph)  # Executa o DFS Sem Backtracking e coleta o resultado
+        time_taken = timeit.default_timer() - start_time  # Calcula o tempo de execução
+
+        # Exibe os resultados e o tempo de execução
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
+        self.text_area.insert(tk.END, f"Tempo de execução DFS Sem Backtracking: {time_taken:.6f} segundos\n")
 
     def show_graph(self):
         if not self.graph:
