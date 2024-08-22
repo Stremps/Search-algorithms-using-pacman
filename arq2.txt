@@ -7,9 +7,3 @@ pode_ir(b,e,5).
 pode_ir(c,e,1).
 pode_ir(d,f,3).
 pode_ir(e,f,1).
-h(a,f,7).
-h(b,f,6).
-h(c,f,3).
-h(d,f,1).
-h(e,f,1).
-h(f,f,0).
