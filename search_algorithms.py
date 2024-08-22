@@ -38,7 +38,7 @@ def bfs(start_point, end_point, graph):
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
-            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
             return result
 
@@ -51,7 +51,7 @@ def bfs(start_point, end_point, graph):
 
     result += "Nenhum caminho encontrado\n"
     current_mem, peak_mem = tracemalloc.get_traced_memory()
-    result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+    result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
     tracemalloc.stop()
     return result
 
@@ -81,7 +81,7 @@ def dfs(start_point, end_point, graph):
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
-            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
             return result
 
@@ -94,7 +94,7 @@ def dfs(start_point, end_point, graph):
 
     result += "Nenhum caminho encontrado\n"
     current_mem, peak_mem = tracemalloc.get_traced_memory()
-    result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+    result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
     tracemalloc.stop()
     return result
 
@@ -116,7 +116,7 @@ def dfs_no_backtracking(start_point, end_point, graph):
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
-            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
             return result
 
@@ -128,7 +128,7 @@ def dfs_no_backtracking(start_point, end_point, graph):
         else:
             result += "Nenhum caminho encontrado\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
-            result += f"Uso de memória atual: {current_mem / 1024:.2f} KB; Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
             return result
 
