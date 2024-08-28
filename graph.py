@@ -1,14 +1,25 @@
 class Graph:
     def __init__(self):
         self.nodes = {}
+        self.coordinates = {}  # Se necessário para outras heurísticas
+        self.heuristics = {}  # Novo dicionário para armazenar heurísticas
 
     def add_edge(self, origin, destination, cost):
         if origin not in self.nodes:
             self.nodes[origin] = []
         self.nodes[origin].append((destination, cost))
-        # Garantir que o destino também esteja registrado, mesmo que não tenha arestas saindo
         if destination not in self.nodes:
             self.nodes[destination] = []
+
+    def add_heuristic(self, node, end_node, heuristic_value):
+        """Adiciona uma heurística para um nó específico até o nó final"""
+        if node not in self.heuristics:
+            self.heuristics[node] = {}
+        self.heuristics[node][end_node] = heuristic_value
+
+    def get_heuristic(self, node, end_node):
+        """Retorna a heurística de um nó para o nó final"""
+        return self.heuristics.get(node, {}).get(end_node, 0)
 
     def __str__(self):
         graph_str = ""
@@ -41,5 +52,14 @@ def read_file(file):
                 graph.add_edge(origin, destination, cost)
             except ValueError as e:
                 print(f"Erro ao processar a linha: {line}\nErro: {e}")
+        elif line.startswith('h'):  # Ler a heurística do arquivo
+            try:
+                data = line.split('(')[1].split(')')[0].split(',')
+                node = data[0].strip()
+                end_node = data[1].strip()
+                heuristic_value = float(data[2].strip())
+                graph.add_heuristic(node, end_node, heuristic_value)
+            except ValueError as e:
+                print(f"Erro ao processar a linha de heurística: {line}\nErro: {e}")
 
     return start_point, end_point, graph
