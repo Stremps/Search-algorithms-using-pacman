@@ -1,3 +1,4 @@
+from heapq import heappop, heappush
 import tracemalloc
 from collections import deque
 
@@ -141,5 +142,63 @@ def execute_searches(start_point, end_point, graph, search_type):
         return dfs(start_point, end_point, graph)
     elif search_type == "DFS_NO_BACKTRACKING":
         return dfs_no_backtracking(start_point, end_point, graph)
+    elif search_type == "A_STAR":
+        return a_star_search(start_point, end_point, graph)
     else:
         return "Tipo de busca desconhecido"
+
+def heuristic(node, end_point, graph):
+    """
+    Função heurística que retorna uma estimativa da distância de 'node' até 'end_point'.
+    Aqui, vamos usar uma heurística simples: a distância em linha reta.
+    """
+    # Pode ser substituído pela heurística real de distância se disponível.
+    return 0  # Por agora, retorna 0, mas pode ser adaptado para um cálculo real de heurística.
+
+def a_star_search(start_point, end_point, graph):
+    tracemalloc.start()
+    open_set = []
+    heappush(open_set, (0, start_point, [start_point]))  # (custo_total_estimado, nó_atual, caminho)
+    g_scores = {start_point: 0}
+    visited = set()
+    iteration = 1
+    result = ""
+
+    while open_set:
+        result += f"Iteração {iteration}:\n"
+        open_set_str = ", ".join([node for _, node, _ in open_set])
+        result += f"Fila de prioridade (Open Set): {open_set_str}\n"
+
+        current_f_cost, current, path = heappop(open_set)
+        current_g_score = g_scores[current]
+        result += f"Nó a ser visitado: {current}\n"
+        path_cost = calculate_path_cost(graph, path)
+        result += f"Peso total do caminho: {path_cost}\n\n"
+
+        if current in visited:
+            continue
+
+        visited.add(current)
+
+        if current == end_point:
+            result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
+            current_mem, peak_mem = tracemalloc.get_traced_memory()
+            result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+            tracemalloc.stop()
+            return result
+
+        for (neighbor, cost) in graph.nodes.get(current, []):
+            tentative_g_score = current_g_score + cost
+            if neighbor not in g_scores or tentative_g_score < g_scores[neighbor]:
+                g_scores[neighbor] = tentative_g_score
+                f_score = tentative_g_score + heuristic(neighbor, end_point, graph)
+                heappush(open_set, (f_score, neighbor, path + [neighbor]))
+
+        iteration += 1
+
+    result += "Nenhum caminho encontrado\n"
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
+    tracemalloc.stop()
+    return result
+
