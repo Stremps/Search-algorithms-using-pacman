@@ -135,20 +135,6 @@ def dfs_no_backtracking(start_point, end_point, graph):
 
         iteration += 1
 
-def execute_searches(start_point, end_point, graph, search_type):
-    if search_type == "BFS":
-        return bfs(start_point, end_point, graph)
-    elif search_type == "DFS":
-        return dfs(start_point, end_point, graph)
-    elif search_type == "DFS_NO_BACKTRACKING":
-        return dfs_no_backtracking(start_point, end_point, graph)
-    elif search_type == "A_STAR":
-        return a_star_search(start_point, end_point, graph)
-    elif search_type == "A_STAR_WITH_HEURISTIC":
-        return a_star_search_with_file_heuristic(start_point, end_point, graph)
-    else:
-        return "Tipo de busca desconhecido"
-
 def heuristic(node, end_point, graph, source):
     """Retorna a heurística lida do arquivo (source == 1) ou heurística igual a 0 (source == 0)"""
     if(source == 1):
@@ -167,7 +153,7 @@ def a_star_search(start_point, end_point, graph):
 
     while open_set:
         result += f"Iteração {iteration}:\n"
-        open_set_str = ", ".join([node for _, node, _ in open_set])
+        open_set_str = ", ".join([f"({node}: {g_scores[node]} + 0 = {g_scores[node]})" for _, node, _ in open_set])
         result += f"Fila de prioridade (Open Set): {open_set_str}\n"
 
         current_f_cost, current, path = heappop(open_set)
@@ -183,6 +169,8 @@ def a_star_search(start_point, end_point, graph):
 
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
+            performance_measure = round(path_cost / (len(path) - 1), 2) if len(path) > 1 else 0
+            result += f"Medida de desempenho: {performance_measure}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -192,7 +180,7 @@ def a_star_search(start_point, end_point, graph):
             tentative_g_score = current_g_score + cost
             if neighbor not in g_scores or tentative_g_score < g_scores[neighbor]:
                 g_scores[neighbor] = tentative_g_score
-                f_score = tentative_g_score + heuristic(neighbor, end_point, graph, 0)
+                f_score = tentative_g_score  # Sem heurística, h(n) = 0
                 heappush(open_set, (f_score, neighbor, path + [neighbor]))
 
         iteration += 1
@@ -202,6 +190,7 @@ def a_star_search(start_point, end_point, graph):
     result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
     tracemalloc.stop()
     return result
+
 
 def a_star_search_with_file_heuristic(start_point, end_point, graph):
     tracemalloc.start()
@@ -214,7 +203,7 @@ def a_star_search_with_file_heuristic(start_point, end_point, graph):
 
     while open_set:
         result += f"Iteração {iteration}:\n"
-        open_set_str = ", ".join([node for _, node, _ in open_set])
+        open_set_str = ", ".join([f"({node}: {g_scores[node]} + {heuristic(node, end_point, graph, 1)} = {g_scores[node] + heuristic(node, end_point, graph, 1)})" for _, node, _ in open_set])
         result += f"Fila de prioridade (Open Set): {open_set_str}\n"
 
         current_f_cost, current, path = heappop(open_set)
@@ -230,6 +219,8 @@ def a_star_search_with_file_heuristic(start_point, end_point, graph):
 
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
+            performance_measure = round(path_cost / (len(path) - 1), 2) if len(path) > 1 else 0
+            result += f"Medida de desempenho: {performance_measure}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -249,3 +240,75 @@ def a_star_search_with_file_heuristic(start_point, end_point, graph):
     result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
     tracemalloc.stop()
     return result
+
+
+def ida_star_search(start_point, end_point, graph):
+    def search(path, g, threshold, result, iteration):
+        node = path[-1]
+        h = heuristic(node, end_point, graph, 1)
+        f = g + h
+        result += f"Iteração {iteration}:\n"
+        result += f"Fila: ({node}: {g} + {h} = {f})\n"
+
+        if f > threshold:
+            return f, None, result
+        
+        if node == end_point:
+            return g, path, result
+        
+        min_threshold = float('inf')
+        for (neighbor, cost) in graph.nodes.get(node, []):
+            if neighbor not in path:  # Evitar ciclos
+                path.append(neighbor)
+                result += f"Explorando vizinho: {neighbor}, Custo: {cost}\n"
+                t, result_path, result = search(path, g + cost, threshold, result, iteration + 1)
+                
+                if result_path is not None:
+                    return t, result_path, result
+                
+                if t < min_threshold:
+                    min_threshold = t
+                
+                path.pop()
+        return min_threshold, None, result
+
+    # Início da Busca IDA*
+    threshold = heuristic(start_point, end_point, graph, 1)
+    path = [start_point]
+    result = ""
+    iteration = 1
+    
+    while True:
+        result += f"Iniciando nova iteração com limiar: {threshold}\n"
+        t, result_path, result = search(path, 0, threshold, result, iteration)
+        
+        if result_path is not None:
+            result += f"Fim da execução\nDistância: {len(result_path) - 1}\nCaminho: {' -> '.join(result_path)} com custo {t}\n"
+            performance_measure = round(t / len(result_path), 2)
+            result += f"Medida de desempenho: {performance_measure}\n"
+            return result
+        
+        if t == float('inf'):
+            result += "Nenhum caminho encontrado\n"
+            return result
+        
+        result += f"Iteração {iteration} finalizada. Novo limiar definido: {t}\n\n"
+        threshold = t
+        iteration += 1
+
+
+def execute_searches(start_point, end_point, graph, search_type):
+    if search_type == "BFS":
+        return bfs(start_point, end_point, graph)
+    elif search_type == "DFS":
+        return dfs(start_point, end_point, graph)
+    elif search_type == "DFS_NO_BACKTRACKING":
+        return dfs_no_backtracking(start_point, end_point, graph)
+    elif search_type == "A_STAR":
+        return a_star_search(start_point, end_point, graph)
+    elif search_type == "A_STAR_WITH_HEURISTIC":
+        return a_star_search_with_file_heuristic(start_point, end_point, graph)
+    elif search_type == "IDA_STAR":
+        return ida_star_search(start_point, end_point, graph)
+    else:
+        return "Tipo de busca desconhecido"

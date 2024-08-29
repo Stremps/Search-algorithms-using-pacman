@@ -31,9 +31,11 @@ class App:
         self.a_star_button = tk.Button(self.frame, text="Executar A*", command=self.run_a_star)
         self.a_star_button.pack(side=tk.LEFT)
 
-        # Novo botão para A* com heurística do arquivo
         self.a_star_with_heuristic_button = tk.Button(self.frame, text="Executar A* c/ Heurística", command=self.run_a_star_with_heuristic)
         self.a_star_with_heuristic_button.pack(side=tk.LEFT)
+
+        self.ida_star_button = tk.Button(self.frame, text="Executar IDA*", command=self.run_ida_star)
+        self.ida_star_button.pack(side=tk.LEFT)
 
         self.show_graph_button = tk.Button(self.frame, text="Exibir Grafo", command=self.show_graph)
         self.show_graph_button.pack(side=tk.LEFT)
@@ -132,3 +134,16 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução A* c/ Heurística: {time_taken:.6f} segundos\n")
+        
+    def run_ida_star(self):
+        if not self.graph:
+            messagebox.showerror("Erro", "Carregue um arquivo primeiro!")
+            return
+
+        start_time = timeit.default_timer()
+        result = execute_searches(self.start_point, self.end_point, self.graph, "IDA_STAR")
+        time_taken = timeit.default_timer() - start_time
+
+        self.text_area.delete(1.0, tk.END)
+        self.text_area.insert(tk.END, result)
+        self.text_area.insert(tk.END, f"Tempo de execução IDA*: {time_taken:.6f} segundos\n")
