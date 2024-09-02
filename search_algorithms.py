@@ -169,8 +169,6 @@ def a_star_search(start_point, end_point, graph):
 
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
-            performance_measure = round(path_cost / (len(path) - 1), 2) if len(path) > 1 else 0
-            result += f"Medida de desempenho: {performance_measure}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -219,8 +217,6 @@ def a_star_search_with_file_heuristic(start_point, end_point, graph):
 
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
-            performance_measure = round(path_cost / (len(path) - 1), 2) if len(path) > 1 else 0
-            result += f"Medida de desempenho: {performance_measure}\n"
             current_mem, peak_mem = tracemalloc.get_traced_memory()
             result += f"Pico de uso de memória: {peak_mem / 1024:.2f} KB\n"
             tracemalloc.stop()
@@ -284,8 +280,6 @@ def ida_star_search(start_point, end_point, graph):
         
         if result_path is not None:
             result += f"Fim da execução\nDistância: {len(result_path) - 1}\nCaminho: {' -> '.join(result_path)} com custo {t}\n"
-            performance_measure = round(t / len(result_path), 2)
-            result += f"Medida de desempenho: {performance_measure}\n"
             return result
         
         if t == float('inf'):
@@ -304,9 +298,9 @@ def execute_searches(start_point, end_point, graph, search_type):
         return dfs(start_point, end_point, graph)
     elif search_type == "DFS_NO_BACKTRACKING":
         return dfs_no_backtracking(start_point, end_point, graph)
-    elif search_type == "A_STAR":
+    elif search_type == "A_STAR_WITHOUT_HEURISTIC":
         return a_star_search(start_point, end_point, graph)
-    elif search_type == "A_STAR_WITH_HEURISTIC":
+    elif search_type == "A_STAR":
         return a_star_search_with_file_heuristic(start_point, end_point, graph)
     elif search_type == "IDA_STAR":
         return ida_star_search(start_point, end_point, graph)

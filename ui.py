@@ -28,10 +28,10 @@ class App:
         self.dfs_no_backtracking_button = tk.Button(self.frame, text="Executar DFS Sem Backtracking", command=self.run_dfs_no_backtracking)
         self.dfs_no_backtracking_button.pack(side=tk.LEFT)
 
-        self.a_star_button = tk.Button(self.frame, text="Executar A*", command=self.run_a_star)
+        self.a_star_button = tk.Button(self.frame, text="Executar A* sem Heurística/UCS", command=self.run_a_star)
         self.a_star_button.pack(side=tk.LEFT)
 
-        self.a_star_with_heuristic_button = tk.Button(self.frame, text="Executar A* c/ Heurística", command=self.run_a_star_with_heuristic)
+        self.a_star_with_heuristic_button = tk.Button(self.frame, text="Executar A*", command=self.run_a_star_with_heuristic)
         self.a_star_with_heuristic_button.pack(side=tk.LEFT)
 
         self.ida_star_button = tk.Button(self.frame, text="Executar IDA*", command=self.run_ida_star)
@@ -115,12 +115,12 @@ class App:
             return
 
         start_time = timeit.default_timer()
-        result = execute_searches(self.start_point, self.end_point, self.graph, "A_STAR")
+        result = execute_searches(self.start_point, self.end_point, self.graph, "A_STAR_WITHOUT_HEURISTIC")
         time_taken = timeit.default_timer() - start_time
 
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
-        self.text_area.insert(tk.END, f"Tempo de execução A*: {time_taken:.6f} segundos\n")
+        self.text_area.insert(tk.END, f"Tempo de execução A*/UCS: {time_taken:.6f} segundos\n")
 
     def run_a_star_with_heuristic(self):
         if not self.graph:
@@ -128,7 +128,7 @@ class App:
             return
 
         start_time = timeit.default_timer()
-        result = execute_searches(self.start_point, self.end_point, self.graph, "A_STAR_WITH_HEURISTIC")
+        result = execute_searches(self.start_point, self.end_point, self.graph, "A_STAR")
         time_taken = timeit.default_timer() - start_time
 
         self.text_area.delete(1.0, tk.END)
