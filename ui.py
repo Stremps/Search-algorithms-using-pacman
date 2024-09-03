@@ -43,8 +43,12 @@ class App:
         self.text_area = scrolledtext.ScrolledText(root, wrap=tk.NONE, width=100, height=30)
         self.text_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
         
-    def load_file(self):
-        self.file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+    def load_file(self, file_path=None):
+        if file_path is None:
+            self.file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+        else:
+            self.file_path = file_path
+
         if not self.file_path:
             return
 
@@ -54,9 +58,13 @@ class App:
             self.text_area.insert(tk.END, f"Ponto Inicial: {self.start_point}\n")
             self.text_area.insert(tk.END, f"Ponto Final: {self.end_point}\n")
             self.text_area.insert(tk.END, f"{self.graph}\n")
-            messagebox.showinfo("Sucesso", "Arquivo carregado com sucesso!")
+            if file_path is None:
+                messagebox.showinfo("Sucesso", "Arquivo carregado com sucesso!")
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao carregar o arquivo: {e}")
+            if file_path is None:
+                messagebox.showerror("Erro", f"Erro ao carregar o arquivo: {e}")
+            else:
+                print(f"Erro ao carregar o arquivo: {e}")
 
     def run_bfs(self):
         if not self.graph:
@@ -70,6 +78,7 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução BFS: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")
 
     def run_dfs(self):
         if not self.graph:
@@ -83,6 +92,8 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução DFS: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")
+
 
     def run_dfs_no_backtracking(self):
         if not self.graph:
@@ -96,6 +107,7 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução DFS Sem Backtracking: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")
 
     def show_graph(self):
         if not self.graph:
@@ -121,6 +133,7 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução A*/UCS: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")
 
     def run_a_star_with_heuristic(self):
         if not self.graph:
@@ -134,6 +147,7 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução A* c/ Heurística: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")
         
     def run_ida_star(self):
         if not self.graph:
@@ -147,3 +161,4 @@ class App:
         self.text_area.delete(1.0, tk.END)
         self.text_area.insert(tk.END, result)
         self.text_area.insert(tk.END, f"Tempo de execução IDA*: {time_taken:.6f} segundos\n")
+        print(result + f"Tempo de execução: {time_taken:.6f} segundos\n")

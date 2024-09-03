@@ -29,7 +29,7 @@ def bfs(start_point, end_point, graph):
         in_queue.remove(current)
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Peso total do caminho: {path_cost}\n\n"
+        result += f"peso total do caminho : {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -72,7 +72,7 @@ def dfs(start_point, end_point, graph):
         in_stack.remove(current)
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Peso total do caminho: {path_cost}\n\n"
+        result += f"peso total do caminho : {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -112,7 +112,7 @@ def dfs_no_backtracking(start_point, end_point, graph):
         result += f"Nó atual: {current}\n"
         result += f"Caminho: {' -> '.join(path)}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Peso total do caminho: {path_cost}\n\n"
+        result += f"peso total do caminho : {path_cost}\n\n"
 
         if current == end_point:
             result += f"Fim da execução\nDistância: {len(path) - 1}\nCaminho: {' -> '.join(path)}\nPeso total do caminho: {path_cost}\n"
@@ -160,7 +160,7 @@ def a_star_search(start_point, end_point, graph):
         current_g_score = g_scores[current]
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Peso total do caminho: {path_cost}\n\n"
+        result += f"peso total do caminho : {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -208,7 +208,7 @@ def a_star_search_with_file_heuristic(start_point, end_point, graph):
         current_g_score = g_scores[current]
         result += f"Nó a ser visitado: {current}\n"
         path_cost = calculate_path_cost(graph, path)
-        result += f"Peso total do caminho: {path_cost}\n\n"
+        result += f"peso total do caminho : {path_cost}\n\n"
 
         if current in visited:
             continue
@@ -267,7 +267,8 @@ def ida_star_search(start_point, end_point, graph):
                 
                 path.pop()
         return min_threshold, None, result
-
+    
+    tracemalloc.start()
     # Início da Busca IDA*
     threshold = heuristic(start_point, end_point, graph, 1)
     path = [start_point]
@@ -279,11 +280,23 @@ def ida_star_search(start_point, end_point, graph):
         t, result_path, result = search(path, 0, threshold, result, iteration)
         
         if result_path is not None:
-            result += f"Fim da execução\nDistância: {len(result_path) - 1}\nCaminho: {' -> '.join(result_path)} com custo {t}\n"
+            result += f"Fim da execução\nDistância: {len(result_path) - 1}\nCaminho: {' -> '.join(result_path)}\nPeso total do caminho: {t}\n"
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+            # Adicionar informação de memória ao resultado
+            result += f"Pico de uso de memória: {peak / 1024:.2f} KB\n"
+            
             return result
         
         if t == float('inf'):
             result += "Nenhum caminho encontrado\n"
+            
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+            # Adicionar informação de memória ao resultado
+            result += f"Pico de uso de memória: {peak / 1024:.2f} KB\n"
             return result
         
         result += f"Iteração {iteration} finalizada. Novo limiar definido: {t}\n\n"
